@@ -1,10 +1,10 @@
 package main
 
 import (
-	"exercise/internal/app/database"
-	"exercise/internal/app/exercise/handler"
-	userHandler "exercise/internal/app/user/handler"
-	"exercise/internal/pkg/middleware"
+	"latihan-course-batch-6/cmd/internal/app/database"
+	"latihan-course-batch-6/cmd/internal/app/exercise/handler"
+	userHandler "latihan-course-batch-6/cmd/internal/app/user/handler"
+	"latihan-course-batch-6/cmd/internal/pkg/middleware"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,10 +21,8 @@ func main() {
 	db := database.NewConnDatabase()
 	exerciseHandler := handler.NewExerciseHandler(db)
 	userHandler := userHandler.NewUserHandler(db)
-	r.GET("/exercises/:id", middleware.WithAuh(), exerciseHandler.GetExerciseByID)
-	r.GET("/exercises/:id/score", middleware.WithAuh(), exerciseHandler.GetScore)
-
+	r.GET("/exercises/:id", middleware.WithAuth(), exerciseHandler.GetExerciseByID)
+	r.GET("/exercises/:id/score", middleware.WithAuth(), exerciseHandler.GetScore)
 	r.POST("/register", userHandler.Register)
-	r.POST("/login", userHandler.Login)
 	r.Run(":1234")
 }
