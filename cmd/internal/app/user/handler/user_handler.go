@@ -47,3 +47,42 @@ func (uh UserHandler) Register(c *gin.Context) {
 		"token": token,
 	})
 }
+
+func (uh UserHandler) Login(c *gin.Context) {
+	var userLogin domain.UserLogin
+	if err := c.ShouldBind(&userLogin); err != nil {
+		c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "invalid body",
+		})
+	}
+
+	var user domain.User
+	err := uh.db.Where("email = ?", userLogin.Email).Take(&user).Error
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, map[string]string{
+			"message": "invalid username",
+		})
+		return
+	}
+
+	// err := user.Login(userLogin.Email, userLogin.Password).Take(&user)
+	if err := user.Login(userLogin.Email, userLogin.Password); !err {
+		// if err != nil {
+		c.JSON(http.StatusUnauthorized, map[string]string{
+			"message": user.Email + " invalid in uh",
+		})
+		return
+	}
+
+	token, err := user.GenerateJWT()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, map[string]string{
+			"message": "error generating token",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]string{
+		"token": token,
+	})
+}
